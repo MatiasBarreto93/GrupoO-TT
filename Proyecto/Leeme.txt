@@ -1,0 +1,37 @@
+Metodología de la Investigación 2022
+TP4
+
+Grupo-O-TT
+
+Proyecto: Juego de Ajedrez (2D) multijugador y multiplataforma (Linux / Windows)
+
+Integrantes: 
+Matias Gustavo Barreto Holtzeker
+Jonathan Rodrigo Videla
+
+Lenguaje a Utilizar: 
+Python
+
+Entorno de desarrollo:
+Sistema Operativo a Utilizar: Linux (Ubuntu x64)
+IDE: PyCharm
+
+Desafio Principal Propuesto:
+
+En Orden a programar:
+-Crear el tablero, colocar cada ficha y mostrarlo por pantalla (2D).
+-Configurar los movimiento de cada ficha utilizando el mouse.
+-Programacion de un "motor de ajedrez" completo que contendra los movimientos legales de cada ficha y
+todas las reglas del ajedrez contempladas por jugada. Ej: enroque, bloqueo de movimientos hasta salir del jaque, poner a su propia reina en jaque, etc.
+-Creacion de una IA (Inteligencia Artificial) que reconozca de todos los posibles movimientos el mas adecuado a la situacion para finalmente ganar.
+-Modos de juego multijugador de forma local (Persona vs Persona) y (Persona vs IA).
+
+Desafios Opcionales/Extras Propuestos:
+
+-Agregar colores al seleccionar una ficha y mostrar sus movimientos legales.
+-Simulacion del desplazamiento al realizar una jugada con la ficha seleccionada
+-Menu Principal (GUI).
+-Historial de Movimientos.
+-Agregar Reloj.
+-Modos de juegos.
+-Sonidos generales.
