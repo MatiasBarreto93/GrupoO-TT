@@ -9,7 +9,6 @@ SQ_SIZE = HEIGHT // DIMENSION  # Tamaño de los cuadrados
 MAX_FPS = 15  # Para animaciones
 IMAGES = {}
 
-
 # Se crea un diccionario de images, el cual sera llamado en el main y se cargara una vez para optimizar el programa
 
 def loadimages():
@@ -28,14 +27,31 @@ def main():
     gs = ChessEngine.GameState()
     loadimages()
     running = True
+    sqSelected = ()
+    playerClicks = []
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()  # coordenadas (x,y) posicion del mouse
+                col = location[0]//SQ_SIZE
+                row = location[1]//SQ_SIZE
+                if sqSelected == (row, col):
+                    sqSelected = ()
+                    playerClicks = []
+                else:
+                    sqSelected = (row, col)
+                    playerClicks.append(sqSelected)
+                if len(playerClicks) == 2:
+                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    print(move.getchessnotation())
+                    gs.makemove(move)
+                    sqSelected = ()
+                    playerClicks = []
         drawgamestate(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
-
 
 # Responsable de todos los graficos del estado actual del juego
 
@@ -48,7 +64,7 @@ def drawboard(screen):
     colors = [p.Color(255, 241, 221), p.Color(181, 148, 109)]
     for r in range(DIMENSION):
         for c in range(DIMENSION):
-            color = colors[((r+c) % 2)]
+            color = colors[((r + c) % 2)]
             p.draw.rect(screen, color, p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 
