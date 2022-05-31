@@ -16,6 +16,7 @@ class GameState:
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
+        self.movefunctions = {'P': self.getpawnmoves, 'R': self.getrookmoves, 'N': self.getknightmoves, 'B': self.getbishopmoves, 'Q': self.getqueenmoves, 'K': self.getkingmoves}
         self.whiteToMove = True
         self.moveLog = []
 
@@ -25,7 +26,7 @@ class GameState:
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
 
-    # Deshace el ultimo movimiento realizado
+# Deshace el ultimo movimiento realizado
     def undomove(self):
         if len(self.moveLog) != 0:  # Se asegura de que exista un movimiento para deshacer
             move = self.moveLog.pop()
@@ -33,30 +34,67 @@ class GameState:
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
 
-    # Todos los movimientos incluyendo jaque
+# Todos los movimientos incluyendo jaque
     def getvalidmoves(self):
         return self.getallposiblesmoves()
 
-    # Todos los movimientos sin incluir jaque
+# Todos los movimientos sin incluir jaque
     def getallposiblesmoves(self):
-        moves = [Move((6, 4), (4, 4), self.board)]
+        # moves = [Move((6, 4), (4, 4), self.board)] Test del algoritmo
+        moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn = self.board[r][c][0]
-                if(turn == 'w' and self.whiteToMove) and (turn == 'b' and not self.whiteToMove):
+                if(turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
                     piece = self.board[r][c][1]
-                    if piece == 'P':
-                        self.getpawnmoves(r, c, moves)
-                    elif piece == 'R':
-                        self.getrookmoves(r, c, moves)
+                    self.movefunctions[piece](r, c, moves)  # Llama al diccionario de funciones
         return moves
 
+# Movimiento de los peones
     def getpawnmoves(self, r, c, moves):
-        pass
+        if self.whiteToMove:  # Turno del jugador blanco
+            if self.board[r-1][c] == "--":  # Movimiento de 1 lugar si esta vacio
+                moves.append(Move((r, c), (r-1, c), self.board))
+                if r == 6 and self.board[r-2][c] == "--":  # Movimiento de 2 lugares si es el 1er movimiento y vacio
+                    moves.append(Move((r, c), (r-2, c), self.board))
+            if c-1 >= 0:  # Captura la ficha enemiga que esta a la izquierda
+                if self.board[r-1][c-1][0] == 'b':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r-1, c-1), self.board))
+            if c+1 <= 7:  # Captura la ficha enemiga que esta a la derecha
+                if self.board[r-1][c+1][0] == 'b':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r-1, c+1), self.board))
+        else:  # Turno del jugador negro
+            if self.board[r+1][c] == "--":  # Movimiento de 1 lugar si esta vacio
+                moves.append(Move((r, c), (r+1, c), self.board))
+                if r == 1 and self.board[r+2][c] == "--":  # Movimiento de 2 lugares si es el 1er movimiento y vacio
+                    moves.append(Move((r, c), (r+2, c), self.board))
+            if c-1 >= 0:  # Captura la ficha enemiga que esta a la izquierda
+                if self.board[r+1][c-1][0] == 'w':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r+1, c-1), self.board))
+            if c+1 <= 7:  # Captura la ficha enemiga que esta a la derecha
+                if self.board[r+1][c+1][0] == 'w':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r+1, c+1), self.board))
+        # Agregar coronacion de peones
 
+# Movimiento de las torres
     def getrookmoves(self, r, c, moves):
         pass
 
+# Movimiento de los caballos
+    def getknightmoves(self, r, c, moves):
+        pass
+
+# Movimiento de los alfiles
+    def getbishopmoves(self, r, c, moves):
+        pass
+
+# Movimiento de la reina
+    def getqueenmoves(self, r, c, moves):
+        pass
+
+# Movimiento del rey
+    def getkingmoves(self, r, c, moves):
+        pass
 
 class Move:
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4,
@@ -74,7 +112,6 @@ class Move:
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
-        print(self.moveID)
 
     def __eq__(self, other):
         if isinstance(other, Move):

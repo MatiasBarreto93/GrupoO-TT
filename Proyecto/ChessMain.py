@@ -50,16 +50,16 @@ def main():
                 if len(playerclicks) == 2:
                     move = ChessEngine.Move(playerclicks[0], playerclicks[1], gs.board)
                     print(move.getchessnotation())
-                    gs.makemove(move)
-                    movemade = True
-                    sqselected = ()
-                    playerclicks = []
+                    if move in validmoves:
+                        gs.makemove(move)
+                        movemade = True
+                        sqselected = ()
+                        playerclicks = []
             # Controles teclas
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:  # Deshace movimiento realizado cuando se presiona la tecla 'z'
                     gs.undomove()
                     movemade = True
-
         if movemade:
             validmoves = gs.getvalidmoves()
             movemade = False
