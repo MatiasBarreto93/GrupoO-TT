@@ -25,6 +25,38 @@ class GameState:
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
 
+    # Deshace el ultimo movimiento realizado
+    def undomove(self):
+        if len(self.moveLog) != 0:  # Se asegura de que exista un movimiento para deshacer
+            move = self.moveLog.pop()
+            self.board[move.startRow][move.startCol] = move.pieceMoved
+            self.board[move.endRow][move.endCol] = move.pieceCaptured
+            self.whiteToMove = not self.whiteToMove
+
+    # Todos los movimientos incluyendo jaque
+    def getvalidmoves(self):
+        return self.getallposiblesmoves()
+
+    # Todos los movimientos sin incluir jaque
+    def getallposiblesmoves(self):
+        moves = [Move((6, 4), (4, 4), self.board)]
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                turn = self.board[r][c][0]
+                if(turn == 'w' and self.whiteToMove) and (turn == 'b' and not self.whiteToMove):
+                    piece = self.board[r][c][1]
+                    if piece == 'P':
+                        self.getpawnmoves(r, c, moves)
+                    elif piece == 'R':
+                        self.getrookmoves(r, c, moves)
+        return moves
+
+    def getpawnmoves(self, r, c, moves):
+        pass
+
+    def getrookmoves(self, r, c, moves):
+        pass
+
 
 class Move:
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4,
@@ -34,13 +66,20 @@ class Move:
                    "e": 4, "f": 5, "g": 6, "h": 7}
     colsToFiles = {v: k for k, v in filesToCols.items()}
 
-    def __int__(self, startsq, endsq, board):
+    def __init__(self, startsq, endsq, board):
         self.startRow = startsq[0]
         self.startCol = startsq[1]
         self.endRow = endsq[0]
         self.endCol = endsq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+        self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
+        print(self.moveID)
+
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return self.moveID == other.moveID
+        return False
 
     def getchessnotation(self):
         return self.getrankfile(self.startRow, self.startCol) + self.getrankfile(self.endRow, self.endCol)

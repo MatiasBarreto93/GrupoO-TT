@@ -9,6 +9,7 @@ SQ_SIZE = HEIGHT // DIMENSION  # Tamaño de los cuadrados
 MAX_FPS = 15  # Para animaciones
 IMAGES = {}
 
+
 # Se crea un diccionario de images, el cual sera llamado en el main y se cargara una vez para optimizar el programa
 
 def loadimages():
@@ -25,33 +26,48 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     gs = ChessEngine.GameState()
+    validmoves = gs.getvalidmoves()
+    movemade = False  # Variable que indica cuando se realiza un movimiento
     loadimages()
     running = True
-    sqSelected = ()
-    playerClicks = []
+    sqselected = ()
+    playerclicks = []
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            # Controles mouse
             elif e.type == p.MOUSEBUTTONDOWN:
                 location = p.mouse.get_pos()  # coordenadas (x,y) posicion del mouse
-                col = location[0]//SQ_SIZE
-                row = location[1]//SQ_SIZE
-                if sqSelected == (row, col):
-                    sqSelected = ()
-                    playerClicks = []
+                col = location[0] // SQ_SIZE
+                row = location[1] // SQ_SIZE
+                if sqselected == (row, col):
+                    sqselected = ()
+                    playerclicks = []
                 else:
-                    sqSelected = (row, col)
-                    playerClicks.append(sqSelected)
-                if len(playerClicks) == 2:
-                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    sqselected = (row, col)
+                    playerclicks.append(sqselected)
+                if len(playerclicks) == 2:
+                    move = ChessEngine.Move(playerclicks[0], playerclicks[1], gs.board)
                     print(move.getchessnotation())
                     gs.makemove(move)
-                    sqSelected = ()
-                    playerClicks = []
+                    movemade = True
+                    sqselected = ()
+                    playerclicks = []
+            # Controles teclas
+            elif e.type == p.KEYDOWN:
+                if e.key == p.K_z:  # Deshace movimiento realizado cuando se presiona la tecla 'z'
+                    gs.undomove()
+                    movemade = True
+
+        if movemade:
+            validmoves = gs.getvalidmoves()
+            movemade = False
+
         drawgamestate(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
+
 
 # Responsable de todos los graficos del estado actual del juego
 
