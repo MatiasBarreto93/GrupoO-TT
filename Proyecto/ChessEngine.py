@@ -27,7 +27,7 @@ class GameState:
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
 
-# Deshace el ultimo movimiento realizado
+    # Deshace el ultimo movimiento realizado
     def undomove(self):
         if len(self.moveLog) != 0:  # Se asegura de que exista un movimiento para deshacer
             move = self.moveLog.pop()
@@ -35,53 +35,69 @@ class GameState:
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
 
-# Todos los movimientos incluyendo jaque
+    # Todos los movimientos incluyendo jaque
     def getvalidmoves(self):
         return self.getallposiblesmoves()
 
-# Todos los movimientos sin incluir jaque
+    # Todos los movimientos sin incluir jaque
     def getallposiblesmoves(self):
         # moves = [Move((6, 4), (4, 4), self.board)] Test del algoritmo
         moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn = self.board[r][c][0]
-                if(turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
                     piece = self.board[r][c][1]
                     self.movefunctions[piece](r, c, moves)  # Llama al diccionario de funciones
         return moves
 
-# Movimiento de los peones
+    # Movimiento de los peones
     def getpawnmoves(self, r, c, moves):
         if self.whiteToMove:  # Turno del jugador blanco
-            if self.board[r-1][c] == "--":  # Movimiento de 1 lugar si esta vacio
-                moves.append(Move((r, c), (r-1, c), self.board))
-                if r == 6 and self.board[r-2][c] == "--":  # Movimiento de 2 lugares si es el 1er movimiento y vacio
-                    moves.append(Move((r, c), (r-2, c), self.board))
-            if c-1 >= 0:  # Captura la ficha enemiga que esta a la izquierda
-                if self.board[r-1][c-1][0] == 'b':  # Verifica si hay una ficha de otro color y la captura
-                    moves.append(Move((r, c), (r-1, c-1), self.board))
-            if c+1 <= 7:  # Captura la ficha enemiga que esta a la derecha
-                if self.board[r-1][c+1][0] == 'b':  # Verifica si hay una ficha de otro color y la captura
-                    moves.append(Move((r, c), (r-1, c+1), self.board))
+            if self.board[r - 1][c] == "--":  # Movimiento de 1 lugar si esta vacio
+                moves.append(Move((r, c), (r - 1, c), self.board))
+                if r == 6 and self.board[r - 2][c] == "--":  # Movimiento de 2 lugares si es el 1er movimiento y vacio
+                    moves.append(Move((r, c), (r - 2, c), self.board))
+            if c - 1 >= 0:  # Captura la ficha enemiga que esta a la izquierda
+                if self.board[r - 1][c - 1][0] == 'b':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r - 1, c - 1), self.board))
+            if c + 1 <= 7:  # Captura la ficha enemiga que esta a la derecha
+                if self.board[r - 1][c + 1][0] == 'b':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r - 1, c + 1), self.board))
         else:  # Turno del jugador negro
-            if self.board[r+1][c] == "--":  # Movimiento de 1 lugar si esta vacio
-                moves.append(Move((r, c), (r+1, c), self.board))
-                if r == 1 and self.board[r+2][c] == "--":  # Movimiento de 2 lugares si es el 1er movimiento y vacio
-                    moves.append(Move((r, c), (r+2, c), self.board))
-            if c-1 >= 0:  # Captura la ficha enemiga que esta a la izquierda
-                if self.board[r+1][c-1][0] == 'w':  # Verifica si hay una ficha de otro color y la captura
-                    moves.append(Move((r, c), (r+1, c-1), self.board))
-            if c+1 <= 7:  # Captura la ficha enemiga que esta a la derecha
-                if self.board[r+1][c+1][0] == 'w':  # Verifica si hay una ficha de otro color y la captura
-                    moves.append(Move((r, c), (r+1, c+1), self.board))
+            if self.board[r + 1][c] == "--":  # Movimiento de 1 lugar si esta vacio
+                moves.append(Move((r, c), (r + 1, c), self.board))
+                if r == 1 and self.board[r + 2][c] == "--":  # Movimiento de 2 lugares si es el 1er movimiento y vacio
+                    moves.append(Move((r, c), (r + 2, c), self.board))
+            if c - 1 >= 0:  # Captura la ficha enemiga que esta a la izquierda
+                if self.board[r + 1][c - 1][0] == 'w':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r + 1, c - 1), self.board))
+            if c + 1 <= 7:  # Captura la ficha enemiga que esta a la derecha
+                if self.board[r + 1][c + 1][0] == 'w':  # Verifica si hay una ficha de otro color y la captura
+                    moves.append(Move((r, c), (r + 1, c + 1), self.board))
         # Agregar coronacion de peones
 
-# Movimiento de las torres
+    # Movimiento de las torres
     def getrookmoves(self, r, c, moves):
-        pass
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))  # Arriba, Izquierda, Abajo y Derecha
+        enemycolor = "b" if self.whiteToMove else "w"
+        for d in directions:
+            for i in range(1, 8):
+                endrow = r + d[0] * i
+                endcol = c + d[1] * i
+                if 0 <= endrow < 8 and 0 <= endcol < 8:  # Verifica que se encuentre en el tablero
+                    endpiece = self.board[endrow][endcol]
+                    if endpiece == "--":  # Verifica que el cuadrado este vacio
+                        moves.append(Move((r, c), (endrow, endcol), self.board))
+                    elif endpiece[0] == enemycolor:  # Verifica que la pieza sea enemiga
+                        moves.append(Move((r, c), (endrow, endcol), self.board))
+                        break
+                    else:  # Detecta que la pieza es aliada
+                        break
+                else:  # Detecta que se encuentra fuera del tablero
+                    break
 
-# Movimiento de los caballos
+    # Movimiento de los caballos
     def getknightmoves(self, r, c, moves):
         directions = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1))
         allycolor = "w" if self.whiteToMove else "b"
@@ -93,15 +109,32 @@ class GameState:
                 if endpiece[0] != allycolor:  # Espacio vacio o ficha enemiga
                     moves.append(Move((r, c), (endrow, endcol), self.board))
 
-# Movimiento de los alfiles
+    # Movimiento de los alfiles
     def getbishopmoves(self, r, c, moves):
-        pass
+        directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))  # 4 Diagonales
+        enemycolor = "b" if self.whiteToMove else "w"
+        for d in directions:
+            for i in range(1, 8):  # Como máximo los alfiles pueden moverse 7
+                endrow = r + d[0] * i
+                endcol = c + d[1] * i
+                if 0 <= endrow < 8 and 0 <= endcol < 8:  # Verifica que se encuentre en el tablero
+                    endpiece = self.board[endrow][endcol]
+                    if endpiece == "--":  # Verifica que el cuadrado este vacio
+                        moves.append(Move((r, c), (endrow, endcol), self.board))
+                    elif endpiece[0] == enemycolor:  # Verifica que la pieza sea enemiga
+                        moves.append(Move((r, c), (endrow, endcol), self.board))
+                        break
+                    else:  # Detecta que la pieza es aliada
+                        break
+                else:  # Detecta que se encuentra fuera del tablero
+                    break
 
-# Movimiento de la reina
+    # Movimiento de la reina
     def getqueenmoves(self, r, c, moves):
-        pass
+        self.getrookmoves(r, c, moves)
+        self.getbishopmoves(r, c, moves)
 
-# Movimiento del rey
+    # Movimiento del rey
     def getkingmoves(self, r, c, moves):
         directions = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
         allycolor = "w" if self.whiteToMove else "b"
@@ -112,6 +145,7 @@ class GameState:
                 endpiece = self.board[endrow][endcol]
                 if endpiece[0] != allycolor:  # Espacio vacio o ficha enemiga
                     moves.append(Move((r, c), (endrow, endcol), self.board))
+
 
 
 class Move:
