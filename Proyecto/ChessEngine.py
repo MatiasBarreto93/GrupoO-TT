@@ -99,7 +99,15 @@ class GameState:
 
     # Movimiento de los caballos
     def getknightmoves(self, r, c, moves):
-        pass
+        directions = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1))
+        allycolor = "w" if self.whiteToMove else "b"
+        for m in directions:
+            endrow = r + m[0]
+            endcol = c + m[1]
+            if 0 <= endrow < 8 and 0 <= endcol < 8:
+                endpiece = self.board[endrow][endcol]
+                if endpiece[0] != allycolor:  # Espacio vacio o ficha enemiga
+                    moves.append(Move((r, c), (endrow, endcol), self.board))
 
     # Movimiento de los alfiles
     def getbishopmoves(self, r, c, moves):
@@ -128,7 +136,16 @@ class GameState:
 
     # Movimiento del rey
     def getkingmoves(self, r, c, moves):
-        pass
+        directions = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+        allycolor = "w" if self.whiteToMove else "b"
+        for i in range(8):
+            endrow = r + directions[i][0]
+            endcol = c + directions[i][1]
+            if 0 <= endrow < 8 and 0 <= endcol < 8:
+                endpiece = self.board[endrow][endcol]
+                if endpiece[0] != allycolor:  # Espacio vacio o ficha enemiga
+                    moves.append(Move((r, c), (endrow, endcol), self.board))
+
 
 
 class Move:
