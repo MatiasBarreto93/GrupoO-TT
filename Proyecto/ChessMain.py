@@ -38,8 +38,8 @@ def main():
                 running = False
             # Controles mouse
             elif e.type == p.MOUSEBUTTONDOWN:
-                location = p.mouse.get_pos()  # coordenadas (x,y) posicion del mouse
-                col = location[0] // SQ_SIZE
+                location = p.mouse.get_pos()  # Coordenadas (x,y) posicion del mouse
+                col = location[0] // SQ_SIZE  # Detecta el click en el cuadrado
                 row = location[1] // SQ_SIZE
                 if sqselected == (row, col):
                     sqselected = ()
@@ -55,6 +55,8 @@ def main():
                         movemade = True
                         sqselected = ()
                         playerclicks = []
+                    else:
+                        playerclicks = [sqselected]
             # Controles teclas
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:  # Deshace movimiento realizado cuando se presiona la tecla 'z'
