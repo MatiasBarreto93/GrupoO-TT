@@ -20,12 +20,21 @@ class GameState:
                               'B': self.getbishopmoves, 'Q': self.getqueenmoves, 'K': self.getkingmoves}
         self.whiteToMove = True
         self.moveLog = []
+        self.whitekinglocation = (7, 4)
+        self.blackkinglocation = (0, 4)
+        self.checkmate = False
+        self.stalemate = False
 
     def makemove(self, move):
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
-        self.moveLog.append(move)
+        self.moveLog.append(move)  # Se agrega el movimiento al log
         self.whiteToMove = not self.whiteToMove
+        #  Se actualiza la posicion del rey
+        if move.pieceMoved == 'wK':
+            self.whitekinglocation = (move.endRow, move.endCol)
+        elif move.pieceMoved == 'bK':
+            self.blackkinglocation = (move.endRow, move.endCol)
 
     # Deshace el ultimo movimiento realizado
     def undomove(self):
@@ -34,10 +43,52 @@ class GameState:
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
+            #  Se actualiza la posicion del rey al revertir el movimiento
+            if move.pieceMoved == 'wK':
+                self.whitekinglocation = (move.startRow, move.startCol)
+            elif move.pieceMoved == 'bK':
+                self.blackkinglocation = (move.startRow, move.startCol)
 
     # Todos los movimientos incluyendo jaque
     def getvalidmoves(self):
-        return self.getallposiblesmoves()
+        # 1) Genera todos los posibles movimientos
+        moves = self.getallposiblesmoves()
+        # 2) Por cada movimiento hace un movimiento
+        for i in range(len(moves)-1, -1, -1):  # Se remueve de la lista de movimientos de forma inversa
+            self.makemove(moves[i])
+        # 3) Genera todos los movimientos enemigos posibles
+        # 4) Por cada movimiento enemigo, se fija si esta atacando al rey blanco
+            self.whiteToMove = not self.whiteToMove
+            if self.incheck():
+                moves.remove(moves[i])  # 5) Si se sigue atacando el rey no es un movimiento valido
+            self.whiteToMove = not self.whiteToMove
+            self.undomove()
+        if len(moves) == 0:  # Se fija si es jaque o jaque-mate
+            if self.incheck():
+                self.checkmate = True
+            else:
+                self.stalemate = True
+        else:
+            self.checkmate = False
+            self.stalemate = False
+        return moves
+
+    # Determina si el jugador del turno actual esta en jaque
+    def incheck(self):
+        if self.whiteToMove:
+            return self.squareunderattack(self.whitekinglocation[0], self.whitekinglocation[1])
+        else:
+            return self.squareunderattack(self.blackkinglocation[0], self.blackkinglocation[1])
+
+    # Determina si el enemigo puede atacar al rey en su posicion
+    def squareunderattack(self, r, c):
+        self.whiteToMove = not self.whiteToMove  # Cambia al punto de vista del enemigo actual
+        oppmoves = self.getallposiblesmoves()
+        self.whiteToMove = not self.whiteToMove  # Cambia de turno nuevamente
+        for move in oppmoves:
+            if move.endRow == r and move.endCol == c:  # Identifica si ese cuadrado esta bajo ataque
+                return True
+        return False
 
     # Todos los movimientos sin incluir jaque
     def getallposiblesmoves(self):
@@ -145,7 +196,6 @@ class GameState:
                 endpiece = self.board[endrow][endcol]
                 if endpiece[0] != allycolor:  # Espacio vacio o ficha enemiga
                     moves.append(Move((r, c), (endrow, endcol), self.board))
-
 
 
 class Move:
