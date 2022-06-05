@@ -50,12 +50,13 @@ def main():
                 if len(playerclicks) == 2:
                     move = ChessEngine.Move(playerclicks[0], playerclicks[1], gs.board)
                     print(move.getchessnotation())
-                    if move in validmoves:
-                        gs.makemove(move)
-                        movemade = True
-                        sqselected = ()
-                        playerclicks = []
-                    else:
+                    for i in range(len(validmoves)):
+                        if move == validmoves[i]:
+                            gs.makemove(validmoves[i])
+                            movemade = True
+                            sqselected = ()  # Resetea los clicks del usuario
+                            playerclicks = []
+                    if not movemade:
                         playerclicks = [sqselected]
             # Controles teclas
             elif e.type == p.KEYDOWN:
