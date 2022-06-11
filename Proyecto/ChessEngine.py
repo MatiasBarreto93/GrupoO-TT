@@ -30,8 +30,8 @@ class GameState:
                                              self.currentCastlingRight.wqs, self.currentCastlingRight.bqs)]
 
     def makemove(self, move):
-        self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved
+        self.board[move.startRow][move.startCol] = "--"
         self.moveLog.append(move)  # Se agrega el movimiento al log
         self.whiteToMove = not self.whiteToMove
         #  Se actualiza la posicion del rey
