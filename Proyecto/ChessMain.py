@@ -54,7 +54,7 @@ def main():
                         playerclicks.append(sqselected)
                     if len(playerclicks) == 2:
                         move = ChessEngine.Move(playerclicks[0], playerclicks[1], gs.board)
-                        print(move.getchessnotation())
+                        # print(move.getchessnotation())
                         for i in range(len(validmoves)):
                             if move == validmoves[i]:
                                 gs.makemove(validmoves[i])
@@ -78,7 +78,7 @@ def main():
                     gameover = False
         #  IA buscador de movimientos
         if not gameover and not humanturn:
-            aimove = ChessIA.findrandommove(validmoves)
+            aimove = ChessIA.findbestmove(gs, validmoves)
             gs.makemove(aimove)
             movemade = True
         if movemade:
