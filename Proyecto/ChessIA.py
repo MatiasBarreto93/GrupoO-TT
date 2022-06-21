@@ -5,6 +5,63 @@ CHECKMATE = 1000
 STALEMATE = 0
 DEPTH = 2  # Esta variable controla la profundidad de la IA
 
+knightScores = [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 2, 2, 2, 2, 2, 1],
+                [1, 2, 3, 3, 3, 3, 2, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 3, 3, 3, 2, 1],
+                [1, 2, 2, 2, 2, 2, 2, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]]
+
+bishopScores = [[4, 3, 2, 1, 1, 2, 3, 4],
+                [3, 4, 3, 2, 2, 3, 4, 3],
+                [2, 4, 3, 3, 3, 3, 4, 2],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 3, 3, 3, 2, 1],
+                [3, 4, 3, 2, 2, 3, 4, 3],
+                [4, 3, 2, 1, 1, 2, 3, 4]]
+
+queenScores = [[1, 1, 1, 3, 1, 1, 1, 1],
+               [1, 2, 3, 3, 3, 1, 1, 1],
+               [1, 4, 3, 3, 3, 4, 2, 1],
+               [1, 2, 3, 3, 3, 2, 2, 1],
+               [1, 2, 3, 3, 3, 2, 2, 1],
+               [1, 4, 3, 3, 3, 4, 2, 1],
+               [1, 1, 2, 3, 3, 1, 1, 1],
+               [1, 1, 1, 3, 1, 1, 1, 1]]
+
+rookScores = [[4, 3, 4, 4, 4, 4, 3, 4],
+              [4, 4, 4, 4, 4, 4, 4, 4],
+              [1, 1, 2, 3, 3, 2, 1, 1],
+              [1, 2, 3, 4, 4, 3, 2, 1],
+              [1, 2, 3, 4, 4, 3, 2, 1],
+              [1, 1, 2, 2, 2, 2, 1, 1],
+              [4, 4, 4, 4, 4, 4, 4, 4],
+              [4, 3, 4, 4, 4, 4, 3, 4]]
+
+whitePawnScores = [[8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8],
+                   [5, 6, 6, 7, 7, 6, 6, 5],
+                   [2, 3, 3, 5, 5, 3, 3, 2],
+                   [1, 2, 3, 4, 4, 3, 2, 1],
+                   [1, 1, 2, 3, 3, 2, 1, 1],
+                   [1, 1, 1, 0, 0, 1, 1, 1],
+                   [0, 0, 0, 0, 0, 0, 0, 0]]
+
+blackPawnScores = [[0, 0, 0, 0, 0, 0, 0, 0],
+                   [1, 1, 1, 0, 0, 1, 1, 1],
+                   [1, 1, 2, 3, 3, 2, 1, 1],
+                   [1, 2, 3, 4, 4, 3, 2, 1],
+                   [2, 3, 3, 5, 5, 3, 3, 2],
+                   [5, 6, 6, 7, 7, 6, 6, 5],
+                   [8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8]]
+
+piecePositionScores = {"N": knightScores, "Q": queenScores, "B": bishopScores, "R": rookScores,
+                       "bP": blackPawnScores, "wP": whitePawnScores}
+
 
 def findbestmove(gs, validmoves):
     global nextmove, counter
@@ -26,7 +83,7 @@ def negamax(gs, validmoves, depth, alpha, beta, turnmultiplier):
         gs.makemove(move)
         nextmoves = gs.getvalidmoves()
         # Se llama recursivamente hasta alcanzar una profundidad de 0
-        score = -negamax(gs, nextmoves, depth-1, -beta, -alpha, -turnmultiplier)
+        score = -negamax(gs, nextmoves, depth - 1, -beta, -alpha, -turnmultiplier)
         if score > maxscore:
             maxscore = score
             if depth == DEPTH:  # Si la profundidad esta en el nivel maximo
@@ -49,10 +106,19 @@ def scoreboard(gs):
     elif gs.stalemate:
         return STALEMATE
     score = 0
-    for row in gs.board:
-        for square in row:
-            if square[0] == 'w':
-                score += piecescore[square[1]]
-            elif square[0] == 'b':
-                score -= piecescore[square[1]]
+    for row in range(len(gs.board)):
+        for col in range(len(gs.board[row])):
+            square = gs.board[row][col]
+            if square != "--":  # Comprobamos que no sea un espacio en blanco
+                # Calificamos posicionalmente
+                piecepositionscore = 0
+                if square[1] != "K":  # Si en el cuadrado no hay un rey
+                    if square[1] == "P":  # Si en el cuadrado hay un peon
+                        piecepositionscore = piecePositionScores[square][row][col]
+                    else:  # Si en el cuadrado hay otra pieza
+                        piecepositionscore = piecePositionScores[square[1]][row][col]
+                if square[0] == 'w':
+                    score += piecescore[square[1]] + piecepositionscore * 0.1
+                elif square[0] == 'b':
+                    score -= piecescore[square[1]] + piecepositionscore * 0.1
     return score
