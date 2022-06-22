@@ -1,7 +1,7 @@
 # Este archivo sera responsable de manejar el input del usuario y mostrar el estado actual del juego (GameState)
 
 import pygame as p
-from Proyecto import ChessEngine, ChessIA
+import ChessEngine, ChessIA
 import sys
 from multiprocessing import Process, Queue
 
