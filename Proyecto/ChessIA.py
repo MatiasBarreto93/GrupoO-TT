@@ -63,14 +63,14 @@ piecePositionScores = {"N": knightScores, "Q": queenScores, "B": bishopScores, "
                        "bP": blackPawnScores, "wP": whitePawnScores}
 
 
-def findbestmove(gs, validmoves):
+def findbestmove(gs, validmoves, return_queue):
     global nextmove, counter
     nextmove = None
     counter = 0
     random.shuffle(validmoves)  # Randomiza el primer movimiento para que no sea siempre el mismo
     negamax(gs, validmoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
     print(counter)  # Cuantas iteraciones hace el algoritmo por movimiento
-    return nextmove
+    return return_queue.put(nextmove)
 
 
 def negamax(gs, validmoves, depth, alpha, beta, turnmultiplier):
@@ -122,3 +122,7 @@ def scoreboard(gs):
                 elif square[0] == 'b':
                     score -= piecescore[square[1]] + piecepositionscore * 0.1
     return score
+
+
+def findRandomMove(valid_moves):
+    return random.choice(valid_moves)
