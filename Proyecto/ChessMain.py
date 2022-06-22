@@ -2,6 +2,8 @@
 
 import pygame as p
 from Proyecto import ChessEngine, ChessIA
+import sys
+from multiprocessing import Process, Queue
 
 WIDTH = HEIGHT = 512  # Dimensiones
 DIMENSION = 8  # Se divide en 8 col y 8 fil
@@ -25,75 +27,106 @@ def main():
     screen = p.display.set_mode(size=(WIDTH, HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
-    gs = ChessEngine.GameState()
-    validmoves = gs.getvalidmoves()
-    movemade = False  # Variable que indica cuando se realiza un movimiento
-    loadimages()  # Carga las imagenes una sola vez antes del loop
+    game_state = ChessEngine.GameState()
+    valid_moves = game_state.getvalidmoves()
+    move_made = False
+    loadimages()
     running = True
-    sqselected = ()  # Seguimiento del ultimo click del usuario
-    playerclicks = []  # Guarda los click del usuario
-    gameover = False
-    playerone = False  # Si un usuario esta jugando en blancas es True si es una IA es False
-    playertwo = True  # Si un usuario esta jugando en negras  es True si es una IA es False
+    square_selected = ()
+    player_clicks = []
+    game_over = False
+    ai_thinking = False
+    move_undone = False
+    move_finder_process = None
+    move_log_font = p.font.SysFont("Arial", 14, False, False)
+    player_one = True
+    player_two = False
+
     while running:
-        humanturn = (gs.whiteToMove and playerone) or (not gs.whiteToMove and playertwo)
+        human_turn = (game_state.whiteToMove and player_one) or (not game_state.whiteToMove and player_two)
         for e in p.event.get():
             if e.type == p.QUIT:
-                running = False
-            # Controles mouse
+                p.quit()
+                sys.exit()
+            # mouse handler
             elif e.type == p.MOUSEBUTTONDOWN:
-                if not gameover and humanturn:
-                    location = p.mouse.get_pos()  # Coordenadas (x,y) posicion del mouse
-                    col = location[0] // SQ_SIZE  # Detecta el click en el cuadrado
+                if not game_over:
+                    location = p.mouse.get_pos()
+                    col = location[0] // SQ_SIZE
                     row = location[1] // SQ_SIZE
-                    if sqselected == (row, col):
-                        sqselected = ()
-                        playerclicks = []
+                    if square_selected == (row, col) or col >= 8:
+                        square_selected = ()
+                        player_clicks = []
                     else:
-                        sqselected = (row, col)
-                        playerclicks.append(sqselected)
-                    if len(playerclicks) == 2:
-                        move = ChessEngine.Move(playerclicks[0], playerclicks[1], gs.board)
-                        # print(move.getchessnotation())
-                        for i in range(len(validmoves)):
-                            if move == validmoves[i]:
-                                gs.makemove(validmoves[i])
-                                movemade = True
-                                sqselected = ()  # Resetea los clicks del usuario
-                                playerclicks = []
-                        if not movemade:
-                            playerclicks = [sqselected]
-            # Controles teclas
+                        square_selected = (row, col)
+                        player_clicks.append(square_selected)
+                    if len(player_clicks) == 2 and human_turn:
+                        move = ChessEngine.Move(player_clicks[0], player_clicks[1], game_state.board)
+                        for i in range(len(valid_moves)):
+                            if move == valid_moves[i]:
+                                game_state.makemove(valid_moves[i])
+                                move_made = True
+                                square_selected = ()
+                                player_clicks = []
+                        if not move_made:
+                            player_clicks = [square_selected]
+
+            # key handler
             elif e.type == p.KEYDOWN:
-                if e.key == p.K_z:  # Deshace movimiento realizado cuando se presiona la tecla 'z'
-                    gs.undomove()
-                    movemade = True
-                    gameover = False
-                if e.key == p.K_r:  # Resetea el tablero al apretar R
-                    gs = ChessEngine.GameState()
-                    validmoves = gs.getvalidmoves()
-                    sqselected = ()
-                    playerclicks = []
-                    movemade = False
-                    gameover = False
-        #  IA buscador de movimientos
-        if not gameover and not humanturn:
-            aimove = ChessIA.findbestmove(gs, validmoves)
-            gs.makemove(aimove)
-            movemade = True
-        if movemade:
-            validmoves = gs.getvalidmoves()
+                if e.key == p.K_z:  # undo when 'z' is pressed
+                    game_state.undomove()
+                    move_made = True
+                    game_over = False
+                    if ai_thinking:
+                        move_finder_process.terminate()
+                        ai_thinking = False
+                    move_undone = True
+                if e.key == p.K_r:  # reset the game when 'r' is pressed
+                    game_state = ChessEngine.GameState()
+                    valid_moves = game_state.getvalidmoves()
+                    square_selected = ()
+                    player_clicks = []
+                    move_made = False
+                    game_over = False
+                    if ai_thinking:
+                        move_finder_process.terminate()
+                        ai_thinking = False
+                    move_undone = True
+
+        # AI move finder
+        if not game_over and not human_turn and not move_undone:
+            if not ai_thinking:
+                ai_thinking = True
+                return_queue = Queue()  # used to pass data between threads
+                move_finder_process = Process(target=ChessIA.findbestmove, args=(game_state, valid_moves, return_queue))
+                move_finder_process.start()
+
+            if not move_finder_process.is_alive():
+                ai_move = return_queue.get()
+                if ai_move is None:
+                    ai_move = ChessIA.findRandomMove(valid_moves)
+                game_state.makemove(ai_move)
+                move_made = True
+                ai_thinking = False
+
+        if move_made:
+            valid_moves = game_state.getvalidmoves()
+            move_made = False
+            move_undone = False
+
+        if move_made:
+            valid_moves = game_state.getvalidmoves()
             movemade = False
-        drawgamestate(screen, gs, validmoves, sqselected)
-        if gs.checkmate:
-            gameover = True
-            if gs.whiteToMove:
+        drawgamestate(screen, game_state, valid_moves, square_selected)
+        if game_state.checkmate:
+            game_over = True
+            if game_state.whiteToMove:
                 drawtext(screen, 'Negras Ganan por Jaque-Mate')
             else:
                 drawtext(screen, 'Blancas Ganan por Jaque-Mate')
-        elif gs.stalemate:
-            gameover = True
-            drawtext(screen, 'Jaque')
+        elif game_state.stalemate:
+            game_over = True
+            drawtext(screen, 'Tablas')
 
         clock.tick(MAX_FPS)
         p.display.flip()
@@ -153,3 +186,4 @@ def drawtext(screen, text):
 
 if __name__ == "__main__":
     main()
+

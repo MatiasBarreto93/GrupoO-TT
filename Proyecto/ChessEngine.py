@@ -30,14 +30,14 @@ class GameState:
                                              self.currentCastlingRight.wqs, self.currentCastlingRight.bqs)]
 
     def makemove(self, move):
-        self.board[move.endRow][move.endCol] = move.pieceMoved
         self.board[move.startRow][move.startCol] = "--"
+        self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)  # Se agrega el movimiento al log
         self.whiteToMove = not self.whiteToMove
         #  Se actualiza la posicion del rey
-        if move.pieceMoved == 'wK':
+        if move.pieceMoved == "wK":
             self.whitekinglocation = (move.endRow, move.endCol)
-        elif move.pieceMoved == 'bK':
+        elif move.pieceMoved == "bK":
             self.blackkinglocation = (move.endRow, move.endCol)
 
         # Promocion Peon
@@ -125,6 +125,7 @@ class GameState:
 
     # Todos los movimientos incluyendo jaque
     def getvalidmoves(self):
+        moves = []
         tempenpassantpossible = self.enpassantPosible
         # Copia los derechos de jugada de enroque actuales
         tempcastlerights = CastleRights(self.currentCastlingRight.wks, self.currentCastlingRight.bks,
@@ -336,7 +337,7 @@ class Move:
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.isPawnPromotion = False
-        # Promocion del peor
+        # Promocion del peon
         self.isPawnPromotion = (self.pieceMoved == 'wP' and self.endRow == 0) or \
                                (self.pieceMoved == 'bP' and self.endRow == 7)
         # Captura al paso - Passant
@@ -345,7 +346,6 @@ class Move:
             self.pieceCaptured = 'wP' if self.pieceMoved == 'bP' else 'bP'
         # Movimiento de enroque
         self.isCastleMove = iscastlemove
-
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
 
     def __eq__(self, other):
