@@ -1,0 +1,41 @@
+Intrucciones paso a paso para ejecutar el programa:
+
+1) Descargar el proyecto del repositorio como archivo comprimido de la siguiente pagina
+	https://github.com/MatiasBarreto93/GrupoO-TT
+	(Click en el boton verde y descargar como comprimido)
+
+2)Descomprimir el archivo
+
+3)Abrir la terminal y ejecutar el siguiente comando
+	
+	cd Descargas/GrupoO-TT-main/Proyecto
+
+1) Fijarse si python ya se encuentra instalado en el sistema
+	Ejecutamos el siguiente comando en la terminal:
+
+	python3 --version
+
+2) En el caso de no estar instalado en el sistema
+	Se ejecutan los siguientes comandos en la terminal:
+
+	sudo apt update
+	sudo apt install python3
+
+3) Verificamos la instalacion colocando el siguiente comando en la terminal:
+	
+	python3 --version
+
+4) Se procede la instalacion de pygame con los siguientes comandos:
+	
+	sudo apt-get install python3-pygame
+
+5) Navege hasta ubicarse en la carpeta /Proyecto/:
+	Ejecute las siguientes 3 lineas de comando en la terminal:
+	
+	python3 ChessMain.py
+
+6) A jugar
+
+
+	
+	
