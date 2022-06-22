@@ -34,7 +34,7 @@ def main():
     playerclicks = []  # Guarda los click del usuario
     gameover = False
     playerone = False  # Si un usuario esta jugando en blancas es True si es una IA es False
-    playertwo = False  # Si un usuario esta jugando en negras  es True si es una IA es False
+    playertwo = True  # Si un usuario esta jugando en negras  es True si es una IA es False
     while running:
         humanturn = (gs.whiteToMove and playerone) or (not gs.whiteToMove and playertwo)
         for e in p.event.get():
